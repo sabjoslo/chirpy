@@ -152,15 +152,15 @@ Writing To File
 
 ## Getting user history 
 
-The option `user` can be used to access tweets from a particular user. Twitter allows access to only the last 3200 tweets. The crawler saves the json objects of the tweets in a txt file, one per line. The option would only work if the account is public.
+The option `user` can be used to access tweets from a particular user or a list of users. Twitter allows access to only the last 3200 tweets. The crawler saves the json objects of the tweets in a separate txt file for each user, one per line. The option would only work if the account(s) are public.
 
 The results are saved in user_name.txt in the approproate directories.
 
 #### Usage
 
-	chirpy user –u user_name –o output_dir 
+	chirpy user –u user_name [user_name ...] –o output_dir 
 
-- **-u**: username of the Twitter follower. @ is not required.
+- **-u**: username of the Twitter follower(s). @ is not required.
 - **-o**: *output_dir* is created in `pwd` if not present, for storing the captured file. `dpath` can be mentioned in `harvest.config` to specify a root path for storing all data. The directory would be created there in that case. 
 
 The option creates username.txt in output_dir to save the results.

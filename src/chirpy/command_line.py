@@ -41,7 +41,7 @@ parser.add_argument("-i", "--in", help="input file", action="store", dest = 'inp
 parser.add_argument("-f", "--fo", help="output file", action="store", dest = 'output_file')
 parser.add_argument("-o", "--op", help="output dir", action="store", dest = 'output_dir')
 parser.add_argument("-k", "--kw", help="keyword", action="store", dest = 'query')
-parser.add_argument("-u", "--us", help="username", action="store", dest = 'user')
+parser.add_argument("-u", "--us", type=str, nargs="+", help="username", action="store", dest = 'user')
 parser.add_argument("-n", "--nm", help="tweet limit / hashtag count", action="store", type=int, dest = 'num')
 parser.add_argument("-d", "--dy", help="number of days", action="store", dest = 'days')
 parser.add_argument("-p", "--pd", help="process id", action="store", dest = 'pid')
@@ -75,10 +75,11 @@ elif args.options == 'user':
 
         else:
                 output_dir = args.output_dir
-                user = args.user
+                users = args.user
 		
 		try:
-                	user_history(configs, user, output_dir)
+			for user in users:	
+                		user_history(configs, user, output_dir)
 		
 		except tweepy.error.TweepError as e:
                 	print 'Terminating'
