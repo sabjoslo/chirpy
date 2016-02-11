@@ -14,7 +14,7 @@ import datetime
 import json, time, errno
 import tweepy
 
-def user_history(configs, user, output_dir):
+def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
 	print 'Accessing User', user
 	time.sleep(0.5)
 	print 'Getting Configurations' 
@@ -33,11 +33,9 @@ def user_history(configs, user, output_dir):
 	time.sleep(0.5)
 	outfile = root + output_dir + '/' + output_file
 
-	fo = open(outfile, 'w')
-	fo.close()
-
-        pid = str(os.getpid())
-        logfile = lpath+pid+'.userlog'
+	if overwrite:
+		fo = open(outfile, 'w')
+		fo.close()
 	
 	print 'Retrieving Twitter Profile' 
         time.sleep(0.5)
@@ -56,31 +54,37 @@ def user_history(configs, user, output_dir):
 
 	print 'Extracting User Tweets'
 	time.sleep(0.5)
-	timeline_results = twitter_api.user_timeline(screen_name = user, count=count)
-
-	with open(logfile, 'a') as fo:
-		fo.write(profile+'\n')
-		fo.write(user+'\n')
+	if num < count:
+		timeline_results = twitter_api.user_timeline(screen_name = user, count=num, include_rts=rts)
+	else:
+		timeline_results = twitter_api.user_timeline(screen_name = user, count=count, include_rts=rts)
 
    	status.extend(timeline_results)
 	oldest = status[-1]['id'] - 1
 
-	while len(timeline_results) > 0:
-        	timeline_results = twitter_api.user_timeline(screen_name = user, count=count, max_id=oldest)
+	print 'Tweets Collected: ', len(status)
+
+	while len(timeline_results) > 0 and len(status) < num:
+		left_to_go = num - len(status)
+		if left_to_go < count:
+			timeline_results = twitter_api.user_timeline(screen_name = user, count=left_to_go, max_id=oldest, include_rts=rts)
+		else:
+			timeline_results = twitter_api.user_timeline(screen_name = user, count=count, max_id=oldest, include_rts=rts)
         	status.extend(timeline_results)
         	oldest = status[-1]['id'] - 1
 
         	print 'Tweets Collected: ', len(status)
-
-		with open(logfile, 'a') as fo:
-                        fo.write(str(len(status))+'\n')
+               
+		helpModule.write_to_log_file(len(status), profile, user, logfile)
 
 		time.sleep(6)
 
-	print 'Writing To File'
-	helpModule.write_to_file(status, outfile)
+	if num > len(status):
+		print 'Could not retrieve number specified. Twitter allows access to last 3,200 tweets.'
 
-	os.remove(logfile)
+	print 'Writing To File'
+	helpModule.write_timestamp(len(status), rts, outfile)
+	helpModule.write_to_file(status, outfile)
 	
 	return
 
