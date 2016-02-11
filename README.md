@@ -160,7 +160,7 @@ The results are saved in user_name.txt in the approproate directories.
 
 	chirpy user [options] –u user_name [user_name ...] –o output_dir
 
-- **-u**: username of the Twitter follower(s). @ is not required.
+- **-u**: username of the Twitter follower(s). Can be user's screen name or user ID. @ is not required.
 - **-o**: *output_dir* is created in `pwd` if not present, for storing the captured file. `dpath` can be mentioned in `chirpy.config` to specify a root path for storing all data. The directory would be created there in that case.
 
 **Options**

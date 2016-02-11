@@ -14,6 +14,12 @@ import datetime
 import json, time, errno
 import tweepy
 
+def get_user_timeline(api, user_id, user, count, include_rts, max_id=None):
+	if user_id:
+		return api.user_timeline(user_id=user, count=count, max_id=max_id, include_rts=include_rts)
+	else:
+		return api.user_timeline(screen_name=user, count=count, max_id=max_id, include_rts=include_rts)
+
 def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
 	print 'Accessing User', user
 	time.sleep(0.5)
@@ -55,9 +61,9 @@ def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
 	print 'Extracting User Tweets'
 	time.sleep(0.5)
 	if num < count:
-		timeline_results = twitter_api.user_timeline(screen_name = user, count=num, include_rts=rts)
+		timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, num, rts)
 	else:
-		timeline_results = twitter_api.user_timeline(screen_name = user, count=count, include_rts=rts)
+		timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, count, rts)
 
    	status.extend(timeline_results)
 	oldest = status[-1]['id'] - 1
@@ -67,9 +73,9 @@ def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
 	while len(timeline_results) > 0 and len(status) < num:
 		left_to_go = num - len(status)
 		if left_to_go < count:
-			timeline_results = twitter_api.user_timeline(screen_name = user, count=left_to_go, max_id=oldest, include_rts=rts)
+			timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, left_to_go, rts, oldest)
 		else:
-			timeline_results = twitter_api.user_timeline(screen_name = user, count=count, max_id=oldest, include_rts=rts)
+			timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, count, rts, oldest)
         	status.extend(timeline_results)
         	oldest = status[-1]['id'] - 1
 
