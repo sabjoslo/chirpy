@@ -160,11 +160,10 @@ The results are saved in user_name.txt in the approproate directories.
 
 	chirpy user [user_name ...] [options]
 
-- **-u**: username of the Twitter follower(s). Can be user's screen name or user ID. @ is not required.
+- The option `user_name` specifies usernames of the Twitter follower(s). Can be user's screen name or user ID. @ is not required. Not required if *input_file* is specified (`-i`).
 
 **Options**
 - **-i**: Input file. If specified, the list of users is extracted line-by-line from *input_file*.
-- **-u**: username of the Twitter follower(s). Can be user's screen name or user ID. @ is not required.
 - **-f**: Output file. If specified, the crawler saves the json objects of the tweets in *output_file* in pwd.
 - **-o**: Output directory. If specified, the crawler saves the json objects of the tweets in a separate txt file for each user in *output_dir*, one per line. *output_dir* is created in `pwd` if not present, for storing the captured file. `dpath` can be mentioned in `chirpy.config` to specify a root path for storing all data. The directory would be created there in that case.
 **Note:** If both *output_file* and *output_dir* are specified, *output_dir* is ignored and *output_file* is created in pwd. If neither are specified, json objects of the tweets are written to stdout.
