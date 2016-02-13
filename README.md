@@ -158,13 +158,16 @@ The results are saved in user_name.txt in the approproate directories.
 
 #### Usage
 
-	chirpy user [options] –u user_name [user_name ...] –o output_dir
+	chirpy user [user_name ...] [options]
 
 - **-u**: username of the Twitter follower(s). Can be user's screen name or user ID. @ is not required.
-- **-o**: *output_dir* is created in `pwd` if not present, for storing the captured file. `dpath` can be mentioned in `chirpy.config` to specify a root path for storing all data. The directory would be created there in that case.
 
 **Options**
-
+- **-i**: Input file. If specified, the list of users is extracted line-by-line from *input_file*.
+- **-u**: username of the Twitter follower(s). Can be user's screen name or user ID. @ is not required.
+- **-f**: Output file. If specified, the crawler saves the json objects of the tweets in *output_file* in pwd.
+- **-o**: Output directory. If specified, the crawler saves the json objects of the tweets in a separate txt file for each user in *output_dir*, one per line. *output_dir* is created in `pwd` if not present, for storing the captured file. `dpath` can be mentioned in `chirpy.config` to specify a root path for storing all data. The directory would be created there in that case.
+**Note:** If both *output_file* and *output_dir* are specified, *output_dir* is ignored and *output_file* is created in pwd. If neither are specified, json objects of the tweets are written to stdout.
 - **-n**: *num_tweets* specifies the number of (most recent) tweets to be collected. If unspecificed, *num_tweets* defaults to 3,200.
 - **--retweets** includes retweets in output. If unspecified, retweets are not included in output. **Note:** Twitter includes retweets in rate limits whether --retweets flag is included or not. If *num_tweets* is specified and is below rate limit, retweets will **not** be included in collection count.
 - **--overwrite**: If it exists, overwrite user_name.txt in output_dir file with current output.

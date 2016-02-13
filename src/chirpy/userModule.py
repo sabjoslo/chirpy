@@ -20,7 +20,7 @@ def get_user_timeline(api, user_id, user, count, include_rts, max_id=None):
 	else:
 		return api.user_timeline(screen_name=user, count=count, max_id=max_id, include_rts=include_rts)
 
-def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
+def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
 	print 'Accessing User', user
 	time.sleep(0.5)
 	print 'Getting Configurations' 
@@ -31,15 +31,22 @@ def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
 	if root == 'False':
         	root = './'
 
-	helpModule.make_outdir(root+output_dir)
+	if output_dir: helpModule.make_outdir(root+output_dir)
 	
-	output_file = user+'.txt'
+	write_to_file = True
+	if fo:
+		outfile = root + fo
+	elif output_dir:
+		outfile = root + '/' + output_dir + '/' + user+'.txt'
+	else:
+		outfile = sys.stdout
+		write_to_file = False
+	
 
 	print 'Configuring Files'
 	time.sleep(0.5)
-	outfile = root + output_dir + '/' + output_file
 
-	if overwrite:
+	if overwrite and write_to_file:
 		fo = open(outfile, 'w')
 		fo.close()
 	
@@ -89,8 +96,8 @@ def user_history(configs, user, output_dir, num, rts, overwrite, logfile):
 		print 'Could not retrieve number specified. Twitter allows access to last 3,200 tweets.'
 
 	print 'Writing To File'
-	helpModule.write_timestamp(len(status), rts, outfile)
-	helpModule.write_to_file(status, outfile)
+	helpModule.write_timestamp(user, len(status), rts, write_to_file, outfile)
+	helpModule.write_to_file(status, write_to_file, outfile)
 	
 	return
 

@@ -30,6 +30,7 @@ import signal
 import subprocess
 import ConfigParser
 import tweepy
+import sys
 
 configs = read_config()
 ref_logs(configs['lpath'])
@@ -42,8 +43,8 @@ parser.add_argument("-i", "--in", help="input file", action="store", dest = 'inp
 parser.add_argument("-f", "--fo", help="output file", action="store", dest = 'output_file')
 parser.add_argument("-o", "--op", help="output dir", action="store", dest = 'output_dir')
 parser.add_argument("-k", "--kw", help="keyword", action="store", dest = 'query')
-parser.add_argument("-u", "--us", type=str, nargs="+", help="Twitter user (can be screen name or user ID", action="store", dest = 'user')
-parser.add_argument("-n", "--nm", help="tweet limit / hashtag count", action="store", default=3200, type=int, dest = 'num')
+parser.add_argument("user", type=str, nargs="*", help="Twitter user(s) (can be screen name or user ID", action="store")
+parser.add_argument("-n", "--nm", help="tweet limit / hashtag count", action="store", default=3200, type=int, nargs="?", dest = 'num')
 parser.add_argument("--retweets", help="include retweets in user timeline", action="store_const", const=True, default=False, dest = 'rts')
 parser.add_argument("--overwrite", help="overwrite user file", action="store_const", const=True, default=False, dest = 'overwrite')
 parser.add_argument("-d", "--dy", help="number of days", action="store", dest = 'days')
@@ -72,13 +73,35 @@ if args.options == 'search':
 
 
 elif args.options == 'user':
-	if not args.user or not args.output_dir:
-                print 'Missing Parameters'
-                print 'Requires -u user, -o ouput dir'
+	user_passed = True
+	user_file = False
+	if not args.user:
+		user_passed = False
+		if args.input_file:
+			if len(open(args.input_file, 'r').read()) > 0:
+				user_passed = True
+				user_file = True
+			else:
+				print 'Empty file passed'
+	if not user_passed:
+                print 'Requires user'
 
         else:
-                output_dir = args.output_dir
-                users = args.user
+		fo = False
+		output_dir = False
+		if args.output_file:
+			fo = args.output_file
+		 	output = fo
+		elif args.output_dir:
+               		output_dir = args.output_dir
+			output = output_dir + '/<user>.txt'
+		else:
+			output = 'stdout'
+		if user_file:
+			users = []
+			for line in open(args.input_file, 'r'): users.append(line.rstrip('\n').rstrip('\r'))
+		else:
+                	users = args.user
 		num = args.num
 		rts = args.rts
 		overwrite = args.overwrite
@@ -89,13 +112,13 @@ elif args.options == 'user':
 			logfile = lpath+pid+'.userlog'
 			helpModule.write_header("process", pid, logfile)
 			print 'User(s): ', users
-                        print 'Output directory: ', output_dir
+                        print 'Output written to ', output
                         print 'Number of tweets: ', num
                         print 'Include retweets: ', rts
                         print 'Overwrite: ', overwrite
                        
 			for user in users:
-                		user_history(configs, user, output_dir, num, rts, overwrite, logfile)
+                		user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile)
 			helpModule.delete_file(logfile)			
 
 		except tweepy.error.TweepError as e:
