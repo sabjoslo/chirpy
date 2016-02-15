@@ -8,6 +8,7 @@ import os, json
 import errno
 import time
 from datetime import datetime
+import logging
 
 #------------------------------------------------------------------------
 
@@ -36,6 +37,7 @@ def write_to_log_file(n, profile, user, filepath):
 	return
 
 def delete_file(filepath):
+	logging.info('Deleting '+filepath)
 	os.remove(filepath)
 
 def write_to_file(jsonlist, write_to_file, filepath):
@@ -56,3 +58,5 @@ def make_outdir(path):
 	except OSError as exception:
                 if exception.errno != errno.EEXIST:
                         raise
+			logging.error('Creating '+path+' throws OSError')
+			

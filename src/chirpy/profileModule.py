@@ -10,6 +10,8 @@ import codecs
 from prettytable import PrettyTable
 import time
 import sys
+import json
+import logging
 
 #-----------------------------------------------------------------------------------
 
@@ -20,7 +22,7 @@ def get_profile(ppath, lpath):
 
         if len(profiles) == 0:
                 time.sleep(0.5)
-		print 'No Avaiable Profiles. Add A Few.'
+		print 'No Available Profiles. Add A Few.'
                 sys.exit()
 
         pname = [x[:-8] for x in profiles]
@@ -28,10 +30,19 @@ def get_profile(ppath, lpath):
 
         used = []
 
+	logging.info('Finding available profiles')
         for f in logfiles:
-                with open(lpath+f, 'r') as fo:
-                        a = fo.readlines()
-                used.append(a[0].rstrip())
+		if '.eventlog' not in f:
+              		"""with open(lpath+f, 'r') as fo:
+                        	a = fo.readlines()
+                	used.append(a[0].rstrip())"""
+			logging.debug(str(f))
+			fo = open(lpath+f, 'r').read()
+			if fo.strip():
+				foj = json.loads(fo)
+				if 'profile' in foj:
+					logging.debug('Profile here: '+foj['profile'].upper()) 
+					used.append(foj['profile'].rstrip())
         free = list(set(pname).difference(used))
 
         if free:
@@ -65,16 +76,22 @@ def plist(lpath, ppath):
 
 	lof = os.listdir(lpath)
 	for f in lof:
-		with open(lpath+f, 'r') as fo:
-			a = fo.readlines()
-
-		p = a[0].rstrip()
-		if 'search' in f:
-			logdeets[p] = 'search'
-		if 'stream' in f:
-			logdeets[p] = 'stream'
-		if 'user' in f:
-                        logdeets[p] = 'user'
+		if '.eventlog' not in f:
+			"""with open(lpath+f, 'r') as fo:
+				a = fo.readlines()"""
+			logging.debug(str(f))
+                        fo = open(lpath+f, 'r').read()
+                        if fo.strip():
+                                foj = json.loads(fo)
+                                if 'profile' in foj:
+                                        logging.debug('Profile here: '+foj['profile'].upper())
+					p = foj['profile'].rstrip()
+					if 'search' in f:
+						logdeets[p] = 'search'
+					if 'stream' in f:
+						logdeets[p] = 'stream'
+					if 'user' in f:
+                       			 	logdeets[p] = 'user'
 
 	x = PrettyTable(["Profile Name", "Consumer Key", "Consumer Secret", "Access Token", "Access Token Secret", "Status"])
 	x.align["Profile Name"] = "l"

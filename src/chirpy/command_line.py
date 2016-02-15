@@ -20,7 +20,7 @@ from logModule import ref_logs
 from configModule import read_config
 import profileModule
 from searchModule import searching
-from userModule import user_history
+from userModule import user_setup, user_history
 import parseModule
 import streamModule
 import helpModule
@@ -31,6 +31,8 @@ import subprocess
 import ConfigParser
 import tweepy
 import sys
+import logging
+from ChirpyError import *
 
 configs = read_config()
 ref_logs(configs['lpath'])
@@ -49,10 +51,16 @@ parser.add_argument("--retweets", help="include retweets in user timeline", acti
 parser.add_argument("--overwrite", help="overwrite user file", action="store_const", const=True, default=False, dest = 'overwrite')
 parser.add_argument("-d", "--dy", help="number of days", action="store", dest = 'days')
 parser.add_argument("-p", "--pd", help="process id", action="store", dest = 'pid')
+parser.add_argument("-l", "--log", help="logging level", action="store", default="warning", dest='llevel')
 args = parser.parse_args()
 
 #-------------------------------------------------------------------------------------------------------------
 
+pid = str(os.getpid())
+sessionlog = configs['lpath']+'/'+pid+'.eventlog'
+llevel = args.llevel.upper()
+logging.basicConfig(filename=sessionlog, level=llevel, format='%(asctime)s: \
+	%(name)s:  %(levelname)s: %(message)s')
 
 if args.options == 'search':
     	if not args.query or not args.output_dir or not args.output_file:
@@ -73,6 +81,7 @@ if args.options == 'search':
 
 
 elif args.options == 'user':
+	logging.info('User module called')
 	user_passed = True
 	user_file = False
 	if not args.user:
@@ -81,10 +90,11 @@ elif args.options == 'user':
 			if len(open(args.input_file, 'r').read()) > 0:
 				user_passed = True
 				user_file = True
+				logging.info('Non-empty input file passed')
 			else:
-				print 'Empty file passed'
+				raise InputError('File %s is empty.' % args.input_file, llevel='critical')
 	if not user_passed:
-                print 'Requires user'
+		raise InputError('Requires user.', llevel='critical')
 
         else:
 		fo = False
@@ -107,16 +117,16 @@ elif args.options == 'user':
 		overwrite = args.overwrite
 		
 		try:
-			pid = str(os.getpid())
 			lpath = configs['lpath']
 			logfile = lpath+pid+'.userlog'
-			helpModule.write_header("process", pid, logfile)
 			print 'User(s): ', users
                         print 'Output written to ', output
                         print 'Number of tweets: ', num
                         print 'Include retweets: ', rts
                         print 'Overwrite: ', overwrite
-                       
+ 			
+			user_setup(configs, output_dir, logfile)
+                      
 			for user in users:
                 		user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile)
 			helpModule.delete_file(logfile)			
@@ -124,6 +134,7 @@ elif args.options == 'user':
 		except tweepy.error.TweepError as e:
                 	print 'Terminating'
                 	print e
+			logging.critical(str(e))
 
 elif args.options == 'parse':
         if not args.input_file:
@@ -196,4 +207,3 @@ elif args.options == 'stream_remove':
 else:
         print args.options, ': Command Not Found, check chirpy --help for the avaiable options'
         sys.exit()
-

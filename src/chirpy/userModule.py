@@ -13,17 +13,54 @@ import helpModule
 import datetime
 import json, time, errno
 import tweepy
+import logging
+from configModule import read_config
 
-def get_user_timeline(api, user_id, user, count, include_rts, max_id=None):
+configs = read_config()
+ppath = configs['ppath']
+lpath = configs['lpath']
+root = configs['dpath']
+if root == 'False':
+	root = './'
+
+def user_setup(configs, output_dir, logfile):
+        print 'Getting Configurations'
+        logging.info('Getting Configurations')
+        time.sleep(0.5)
+
+        if output_dir: helpModule.make_outdir(root+output_dir)
+	open(logfile, 'a')
+
+  	print 'Retrieving Twitter Profile'
+        logging.info('Retrieving Twitter Profile')
+        time.sleep(0.5)
+	global __profile
+        __profile = profileModule.get_profile(ppath, lpath)
+	logging.debug('Using profile '+__profile.upper())
+        profilepath = ppath+__profile+'.profile'
+        deets = profileModule.get_deets(profilepath)
+	helpModule.write_header('profile', __profile, logfile)
+
+        print 'Authorizing Twitter Profile'
+        logging.info('Authorizing Twitter Profile')
+        time.sleep(0.5)
+        auth = tweepy.OAuthHandler(deets["consumer_key"], deets["consumer_secret"])
+        auth.set_access_token(deets["access_token"], deets["access_token_secret"])
+        global __twitterapi__
+	__twitterapi__ = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
+	
+def get_user_timeline(user_id, user, count, include_rts, max_id=None):
 	if user_id:
-		return api.user_timeline(user_id=user, count=count, max_id=max_id, include_rts=include_rts)
+		return __twitterapi__.user_timeline(user_id=user, count=count, max_id=max_id, include_rts=include_rts)
 	else:
-		return api.user_timeline(screen_name=user, count=count, max_id=max_id, include_rts=include_rts)
+		return __twitterapi__.user_timeline(screen_name=user, count=count, max_id=max_id, include_rts=include_rts)
 
 def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
-	print 'Accessing User', user
+	"""print 'Accessing User', user
+	logging.info('Accessing User')
 	time.sleep(0.5)
-	print 'Getting Configurations' 
+	print 'Getting Configurations'
+	logging.info('Getting Configurations') 
 	time.sleep(0.5)
 	ppath = configs['ppath']
 	lpath = configs['lpath']
@@ -31,8 +68,26 @@ def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
 	if root == 'False':
         	root = './'
 
-	if output_dir: helpModule.make_outdir(root+output_dir)
+	if output_dir: helpModule.make_outdir(root+output_dir)"""
 	
+	if num > 3200:
+		print 'Twitter only allows access to the last 3,200 user tweets.'
+		loop = True
+		while loop: 
+			new_num = raw_input('Enter another integer, or hit enter to continue.')
+			loop = False
+			if new_num.strip():
+				if new_num.isdigit():
+					num = int(new_num)
+					loop = False
+				else:
+					print 'Integer required.'
+					logging.error('num_tweets not an integer')
+					loop = True
+	if num > 3200:
+		print 'Twitter only allows access to the last 3,200 user tweets.'
+		
+
 	write_to_file = True
 	if fo:
 		outfile = root + fo
@@ -44,33 +99,38 @@ def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
 	
 
 	print 'Configuring Files'
+	logging.info('Configuring Files')
 	time.sleep(0.5)
 
 	if overwrite and write_to_file:
 		fo = open(outfile, 'w')
+		logging.info('Creating empty file '+outfile)
 		fo.close()
 	
-	print 'Retrieving Twitter Profile' 
+	"""print 'Retrieving Twitter Profile'
+	logging.info('Retrieving Twitter Profile')
         time.sleep(0.5)
 	profile = profileModule.get_profile(ppath, lpath)
         profilepath = ppath+profile+'.profile'
         deets = profileModule.get_deets(profilepath)
 
 	print 'Authorizing Twitter Profile'
+	logging.info('Authorizing Twitter Profile')
 	time.sleep(0.5)
 	auth = tweepy.OAuthHandler(deets["consumer_key"], deets["consumer_secret"])
     	auth.set_access_token(deets["access_token"], deets["access_token_secret"])
-    	twitter_api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
+    	twitter_api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())"""
 	
 	count = 200
 	status = []
 
 	print 'Extracting User Tweets'
+	logging.info('Extracting User Tweets')
 	time.sleep(0.5)
 	if num < count:
-		timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, num, rts)
+		timeline_results = get_user_timeline(user.isdigit(), user, num, rts)
 	else:
-		timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, count, rts)
+		timeline_results = get_user_timeline(user.isdigit(), user, count, rts)
 
    	status.extend(timeline_results)
 	oldest = status[-1]['id'] - 1
@@ -80,24 +140,28 @@ def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
 	while len(timeline_results) > 0 and len(status) < num:
 		left_to_go = num - len(status)
 		if left_to_go < count:
-			timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, left_to_go, rts, oldest)
+			timeline_results = get_user_timeline(user.isdigit(), user, left_to_go, rts, oldest)
 		else:
-			timeline_results = get_user_timeline(twitter_api, user.isdigit(), user, count, rts, oldest)
+			timeline_results = get_user_timeline(user.isdigit(), user, count, rts, oldest)
         	status.extend(timeline_results)
         	oldest = status[-1]['id'] - 1
 
         	print 'Tweets Collected: ', len(status)
                
-		helpModule.write_to_log_file(len(status), profile, user, logfile)
+		helpModule.write_to_log_file(len(status), __profile, user, logfile)
 
 		time.sleep(6)
 
 	if num > len(status):
-		print 'Could not retrieve number specified. Twitter allows access to last 3,200 tweets.'
+		print 'Could not retrieve number specified.'
+		logging.warning('Could not retrieve num_tweets specified')
 
 	print 'Writing To File'
+	logging.info('Writing to file '+str(outfile))
 	helpModule.write_timestamp(user, len(status), rts, write_to_file, outfile)
 	helpModule.write_to_file(status, write_to_file, outfile)
 	
+	logging.info('Process completed')
+
 	return
 

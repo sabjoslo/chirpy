@@ -170,22 +170,32 @@ The results are saved in user_name.txt in the approproate directories.
 - **-n**: *num_tweets* specifies the number of (most recent) tweets to be collected. If unspecificed, *num_tweets* defaults to 3,200.
 - **--retweets** includes retweets in output. If unspecified, retweets are not included in output. **Note:** Twitter includes retweets in rate limits whether --retweets flag is included or not. If *num_tweets* is specified and is below rate limit, retweets will **not** be included in collection count.
 - **--overwrite**: If it exists, overwrite user_name.txt in output_dir file with current output.
+- **-l**, **--log**: Sets the root logger level to *DEBUG*, *INFO*, *WARNING*, *ERROR*, or *CRITICAL*. Defaults to *WARNING* if unspecified.
 
-The option creates username.txt in output_dir to save the results.
 
-Example: `chirpy user -u saleemq90 -o testhello`
+Events during the process are stored in an .eventlog file in *lpath*. Other information about the progress made by the process is stored in a .userlog file in *lpath*.
 
-This will search for tweets by user **saleemq90**, list them in a txt file named **saleemq90.txt**, and place them in a directory named **testhello** inside the current directory. 
+Example: `chirpy user saleemq90 -o testhello -n 1000 --retweets --overwrite` 
+
+This will search for the last 1,000 tweets by user **saleemq90** (including retweets), list them in a txt file named **saleemq90.txt**, and place them in a directory named **testhello** inside the current directory, overwriting any existing file with the same path. Note that this user has posted fewer tweets than the rate limit allows access to.
 
 ```
-user:~$ chirpy user -u saleemq90 -o testhello
-Accessing User saleemq90
+user:~$ chirpy user saleemq90 -o testhello --retweets --overwrite
+User(s): ['saleemq90']
+Output written to testhello/<user>.txt
+Number of tweets: 1000
+Include retweets: True
+Overwrite: True
 Getting Configurations
+Retrieving Twitter Profile
+Authorizing Twitter Profile
 Configuring Files
 Retrieving Twitter Profile
 Authorizing Twitter Profile
 Extracting User Tweets
-Tweets Collected:  57
+Tweets Collected:  67
+Tweets Collected: 67
+Could not retrieve number specified.
 Writing To File
 ```
 
