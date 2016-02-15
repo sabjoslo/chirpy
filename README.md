@@ -177,7 +177,7 @@ Events during the process are stored in an .eventlog file in *lpath*. Other info
 
 Example: `chirpy user saleemq90 -o testhello -n 1000 --retweets --overwrite` 
 
-This will search for the last 1,000 tweets by user **saleemq90** (including retweets), list them in a txt file named **saleemq90.txt**, and place them in a directory named **testhello** inside the current directory, overwriting any existing file with the same path. Note that this user has posted fewer tweets than the rate limit allows access to.
+This will search for the last 1,000 tweets by user **saleemq90** (including retweets), list them in a txt file named **saleemq90.txt**, and place them in a directory named **testhello** inside the current directory, overwriting any existing file with the same path. Note that this user has posted fewer tweets than *num_tweets*.
 
 ```
 user:~$ chirpy user saleemq90 -o testhello --retweets --overwrite

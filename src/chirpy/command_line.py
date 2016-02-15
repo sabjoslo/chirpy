@@ -125,10 +125,10 @@ elif args.options == 'user':
                         print 'Include retweets: ', rts
                         print 'Overwrite: ', overwrite
  			
-			user_setup(configs, output_dir, logfile)
+			user_setup(output_dir, logfile)
                       
 			for user in users:
-                		user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile)
+                		user_history(user, fo, output_dir, num, rts, overwrite, logfile)
 			helpModule.delete_file(logfile)			
 
 		except tweepy.error.TweepError as e:

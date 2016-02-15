@@ -33,9 +33,6 @@ def get_profile(ppath, lpath):
 	logging.info('Finding available profiles')
         for f in logfiles:
 		if '.eventlog' not in f:
-              		"""with open(lpath+f, 'r') as fo:
-                        	a = fo.readlines()
-                	used.append(a[0].rstrip())"""
 			logging.debug(str(f))
 			fo = open(lpath+f, 'r').read()
 			if fo.strip():
@@ -77,8 +74,6 @@ def plist(lpath, ppath):
 	lof = os.listdir(lpath)
 	for f in lof:
 		if '.eventlog' not in f:
-			"""with open(lpath+f, 'r') as fo:
-				a = fo.readlines()"""
 			logging.debug(str(f))
                         fo = open(lpath+f, 'r').read()
                         if fo.strip():

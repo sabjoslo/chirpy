@@ -23,7 +23,7 @@ root = configs['dpath']
 if root == 'False':
 	root = './'
 
-def user_setup(configs, output_dir, logfile):
+def user_setup(output_dir, logfile):
         print 'Getting Configurations'
         logging.info('Getting Configurations')
         time.sleep(0.5)
@@ -55,21 +55,7 @@ def get_user_timeline(user_id, user, count, include_rts, max_id=None):
 	else:
 		return __twitterapi__.user_timeline(screen_name=user, count=count, max_id=max_id, include_rts=include_rts)
 
-def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
-	"""print 'Accessing User', user
-	logging.info('Accessing User')
-	time.sleep(0.5)
-	print 'Getting Configurations'
-	logging.info('Getting Configurations') 
-	time.sleep(0.5)
-	ppath = configs['ppath']
-	lpath = configs['lpath']
-	root = configs['dpath']
-	if root == 'False':
-        	root = './'
-
-	if output_dir: helpModule.make_outdir(root+output_dir)"""
-	
+def user_history(user, fo, output_dir, num, rts, overwrite, logfile):	
 	if num > 3200:
 		print 'Twitter only allows access to the last 3,200 user tweets.'
 		loop = True
@@ -106,20 +92,6 @@ def user_history(configs, user, fo, output_dir, num, rts, overwrite, logfile):
 		fo = open(outfile, 'w')
 		logging.info('Creating empty file '+outfile)
 		fo.close()
-	
-	"""print 'Retrieving Twitter Profile'
-	logging.info('Retrieving Twitter Profile')
-        time.sleep(0.5)
-	profile = profileModule.get_profile(ppath, lpath)
-        profilepath = ppath+profile+'.profile'
-        deets = profileModule.get_deets(profilepath)
-
-	print 'Authorizing Twitter Profile'
-	logging.info('Authorizing Twitter Profile')
-	time.sleep(0.5)
-	auth = tweepy.OAuthHandler(deets["consumer_key"], deets["consumer_secret"])
-    	auth.set_access_token(deets["access_token"], deets["access_token_secret"])
-    	twitter_api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())"""
 	
 	count = 200
 	status = []
