@@ -22,15 +22,15 @@ def write_timestamp(user, num, rts, write_to_file, filepath):
 	fo.write('\n')
 	return
 
-def write_header(label, string, filepath):
+def write_header(command, profile, filepath):
 	with open(filepath, 'a') as fo:
-		fo.write(json.dumps({label: string}))
+		fo.write(json.dumps({'command': command, 'profile': profile}))
 	return
 
 def write_to_log_file(n, profile, user, filepath):
 	with open(filepath, 'r+') as fo:
 		log = json.load(fo)
-		log["profile"] = profile
+		#log["profile"] = profile
 		log[user] = {"tweets_collected": n}
 		fo.seek(0)
 		json.dump(log, fo, indent=4)

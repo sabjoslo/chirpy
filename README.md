@@ -8,7 +8,7 @@ a command line interface for quickly collecting and parsing Twitter data.
 
 chirpy is a command line tool for swift and streamlined collection of Twitter data. The toolset is capable of collecting already posted tweets, actively tracking the live Twitter feed for specific keywords and retrieving user history along with additional resources for parsing captured data.
 
-There are three tools for data collection - `search`, `stream`, `user` and two for parsing `tophash` and `parse`. Additional tools involve handling Twitter API profiles and managing running streams.
+There are three tools for data collection - `search`, `stream`, `user` and two for parsing `tophash` and `parse`. Additional tools involve handling Twitter API profiles, managing running streams, and process managing and monitoring.
 
 ***
 
@@ -62,6 +62,15 @@ On installation, chirpy creates a directory `.chirpy` in user home. The director
 - `profile_add`: adds a new Twitter API auth profile.
 - `profile_list`: lists all added Twitter API auth profiles.
 - `profile_remove`: removes an existing Twitter API auth profile.
+
+## Process management and monitoring
+- `resume`: option to rerun the command of an unfinished process.
+*Note:* `resume` was designed for `user` option, and has not been adapted for other options.
+- `cleanup`: deletes existing log files. By default, logs are deleted once the process has been completed. Note that the `--nosweep` flag tells Chirpy not to clean event logs.
+
+## Flags
+- **-l**, **--log**: Sets the root logger level to *DEBUG*, *INFO*, *WARNING*, *ERROR*, or *CRITICAL*. Defaults to *WARNING* if unspecified.
+- **--nosweep**: Tells Chirpy not to clean up event log after session
 
 ***
 
@@ -170,7 +179,6 @@ The results are saved in user_name.txt in the approproate directories.
 - **-n**: *num_tweets* specifies the number of (most recent) tweets to be collected. If unspecificed, *num_tweets* defaults to 3,200.
 - **--retweets** includes retweets in output. If unspecified, retweets are not included in output. **Note:** Twitter includes retweets in rate limits whether --retweets flag is included or not. If *num_tweets* is specified and is below rate limit, retweets will **not** be included in collection count.
 - **--overwrite**: If it exists, overwrite user_name.txt in output_dir file with current output.
-- **-l**, **--log**: Sets the root logger level to *DEBUG*, *INFO*, *WARNING*, *ERROR*, or *CRITICAL*. Defaults to *WARNING* if unspecified.
 
 
 Events during the process are stored in an .eventlog file in *lpath*. Other information about the progress made by the process is stored in a .userlog file in *lpath*.
@@ -320,4 +328,17 @@ To restrict the csv to a particular user:
 * **-u**: The csv file would only have tweets from the user with the specific username.
 
 **Note**: These options can be used together.
+
+***
+
+## Resuming an unfinished process
+
+The resume option looks for existing process logs and reruns the command of a specified process. It assumes the process logs for completed processes have been deleted.
+
+#### Usage
+
+	chirpy resume [-pid PID]
+
+- **-pid** specifies a process ID to rerun. If omitted, Chirpy will list unfinished processes and prompt for input.
+
 

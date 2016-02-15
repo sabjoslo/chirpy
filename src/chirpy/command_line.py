@@ -32,15 +32,18 @@ import ConfigParser
 import tweepy
 import sys
 import logging
+import json
 from ChirpyError import *
 
 configs = read_config()
+"""#ref_logs() function deletes log files from previous processes.
 ref_logs(configs['lpath'])
+"""
 
 #-------------------------------------------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser()
-parser.add_argument("options", help = "Available: search, user, stream, stream_list, stream_remove, profile_add, profile_list, profile_remove, tophash, parse")
+parser.add_argument("options", help = "Available: search, user, stream, stream_list, stream_remove, profile_add, profile_list, profile_remove, tophash, parse, resume, cleanup")
 parser.add_argument("-i", "--in", help="input file", action="store", dest = 'input_file')
 parser.add_argument("-f", "--fo", help="output file", action="store", dest = 'output_file')
 parser.add_argument("-o", "--op", help="output dir", action="store", dest = 'output_dir')
@@ -52,6 +55,8 @@ parser.add_argument("--overwrite", help="overwrite user file", action="store_con
 parser.add_argument("-d", "--dy", help="number of days", action="store", dest = 'days')
 parser.add_argument("-p", "--pd", help="process id", action="store", dest = 'pid')
 parser.add_argument("-l", "--log", help="logging level", action="store", default="warning", dest='llevel')
+parser.add_argument("-pi", help="Process ID of process to resume", action="store", dest='pi')
+parser.add_argument("--nosweep", help="Tells Chirpy not to clean up event log after session", action="store_const", const=True, default=False, dest='nosweep')
 args = parser.parse_args()
 
 #-------------------------------------------------------------------------------------------------------------
@@ -203,7 +208,55 @@ elif args.options == 'stream_remove':
         else:
                 streamModule.kill_p(args.pid, configs['lpath'])
 
+elif args.options == 'resume':
+	logging.info('Resuming a process')
+	lpath = configs['lpath']
+	logfiles = os.listdir(lpath)
+	logging.debug('List of all logs: '+str(logfiles))
+	logfiles = [f for f in logfiles if '.eventlog' not in f]
+	logging.debug('List of all process logs: '+str(logfiles))
+	leftovers = True
+	if args.pi:
+		pi = args.pi
+	else:
+		if len(logfiles) > 0:
+			print 'Unfinished processes: '+str(logfiles)
+			pi = raw_input('Process to resume: ')
+		else:
+			print 'No unfinished processes.'
+                        logging.error('No unfinished processes to resume.')
+			leftovers = False
+	if leftovers:
+		try:
+			found = False
+               		for f in logfiles:
+                       		if pi in f:
+                               		foj = json.load(open(lpath + f, 'r'))
+                               		resumeCommand = foj['command']
+                               		print 'Executing command: '+resumeCommand
+                               		logging.info('Resuming with command '+\
+						resumeCommand)
+                               		found = True
+					os.remove(lpath + f)
+                               		os.system(resumeCommand)
+					os.remove(lpath + \
+						f.split('.')[0]+'.eventlog')
+                       	        	break   
+               		if not found:
+                       		err = InputError('PID not found.')
+                       		logging.error(str(err))
+				raise err
+		except Exception as e:
+			print e
+			logging.error(e)
+
+elif args.options == 'cleanup':
+	ref_logs(configs['lpath'])
 
 else:
         print args.options, ': Command Not Found, check chirpy --help for the avaiable options'
         sys.exit()
+
+logging.shutdown()
+if not args.nosweep:
+	os.remove(sessionlog)

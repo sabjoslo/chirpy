@@ -39,7 +39,7 @@ def user_setup(output_dir, logfile):
 	logging.debug('Using profile '+__profile.upper())
         profilepath = ppath+__profile+'.profile'
         deets = profileModule.get_deets(profilepath)
-	helpModule.write_header('profile', __profile, logfile)
+	helpModule.write_header('chirpy '+' '.join(sys.argv[1:]), __profile, logfile)
 
         print 'Authorizing Twitter Profile'
         logging.info('Authorizing Twitter Profile')
