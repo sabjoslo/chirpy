@@ -10,6 +10,8 @@ chirpy is a command line tool for swift and streamlined collection of Twitter da
 
 There are three tools for data collection - `search`, `stream`, `user` and two for parsing `tophash` and `parse`. Additional tools involve handling Twitter API profiles, managing running streams, and process managing and monitoring.
 
+**Note that this branch is in the process of development. `chirpy stream`, `chirpy parse`, `chirpy tophash` or `chirpy search` won't behave as documented.**
+
 ***
 
 ## Installation

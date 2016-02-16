@@ -105,17 +105,33 @@ def user_history(user, fo, output_dir, num, rts, overwrite, logfile):
 		timeline_results = get_user_timeline(user.isdigit(), user, count, rts)
 
    	status.extend(timeline_results)
+	helpModule.write_to_log_file(len(status), __profile, user, logfile)
+	helpModule.write_timestamp(user, len(status), rts, write_to_file, outfile)
+	logging.info('Writing to file '+str(outfile))
+	for item in status:
+		helpModule.write_to_file(item, write_to_file, outfile)
+		time.sleep(1)
+	logging.info(str(len(status))+' Tweets written to output')
+	logging.debug('[0:'+str(len(status)-1)+'] written to output.')
+	print 'Tweets Collected: ', len(status)
 	oldest = status[-1]['id'] - 1
 
-	print 'Tweets Collected: ', len(status)
-
 	while len(timeline_results) > 0 and len(status) < num:
+		last_ent = status[-1]
 		left_to_go = num - len(status)
 		if left_to_go < count:
 			timeline_results = get_user_timeline(user.isdigit(), user, left_to_go, rts, oldest)
 		else:
 			timeline_results = get_user_timeline(user.isdigit(), user, count, rts, oldest)
         	status.extend(timeline_results)
+		oldest_ix = status.index(last_ent)
+		logging.info('Writing to file '+str(outfile))
+		print 'Writing To File'
+		for item in status[oldest_ix+1:]:
+			helpModule.write_to_file(item, write_to_file, outfile)
+			time.sleep(1)
+		logging.debug('['+str(oldest_ix+1)+':'+str(len(status)-1)+'] written to output.')
+		logging.info(str(len(status))+' Tweets written to output')
         	oldest = status[-1]['id'] - 1
 
         	print 'Tweets Collected: ', len(status)
@@ -128,11 +144,6 @@ def user_history(user, fo, output_dir, num, rts, overwrite, logfile):
 		print 'Could not retrieve number specified.'
 		logging.warning('Could not retrieve num_tweets specified')
 
-	print 'Writing To File'
-	logging.info('Writing to file '+str(outfile))
-	helpModule.write_timestamp(user, len(status), rts, write_to_file, outfile)
-	helpModule.write_to_file(status, write_to_file, outfile)
-	
 	logging.info('Process completed')
 
 	return

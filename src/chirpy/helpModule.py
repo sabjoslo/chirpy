@@ -40,14 +40,13 @@ def delete_file(filepath):
 	logging.info('Deleting '+filepath)
 	os.remove(filepath)
 
-def write_to_file(jsonlist, write_to_file, filepath):
+def write_to_file(item, write_to_file, filepath):
         if write_to_file:
 		fo = open(filepath, 'a')
 	else:
 		fo = filepath
-        for item in jsonlist:
-        	fo.write(json.dumps(item))
-                fo.write('\n')
+        fo.write(json.dumps(item))
+        fo.write('\n')
         return
 
 def make_outdir(path):
