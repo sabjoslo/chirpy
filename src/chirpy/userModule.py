@@ -106,7 +106,7 @@ def user_history(user, fo, output_dir, num, rts, overwrite, logfile):
 
    	status.extend(timeline_results)
 	helpModule.write_to_log_file(len(status), __profile, user, logfile)
-	helpModule.write_timestamp(user, len(status), rts, write_to_file, outfile)
+	helpModule.write_timestamp(user, len(status), rts, write_to_file, outfile) #FIX: passing len(status) passes only the first batch of Tweets -- needs to be changed to reflect all Tweets collected
 	logging.info('Writing to file '+str(outfile))
 	for item in status:
 		helpModule.write_to_file(item, write_to_file, outfile)
