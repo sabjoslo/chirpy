@@ -4,7 +4,7 @@ import csv,codecs,cStringIO
 import json
 import operator
 from prettytable import PrettyTable
-
+import logging
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -44,11 +44,13 @@ def tweet_info(json_obj):
 #-------------------------------------------------------------------------------------------------------------
 
 def create_csv(infile, outfile, query, uname):
+	logging.info('Opening input file '+infile)
 	with open(infile, 'r') as fo:
 		list_of_tweets = fo.readlines()
 
 	tweet_dict = {}
 
+	logging.info('Getting Tweet objects from '+infile)
 	for tweetobject in list_of_tweets:
 		x = tweet_info(tweetobject)
 		x.append(1)
@@ -60,6 +62,7 @@ def create_csv(infile, outfile, query, uname):
 				tweet_dict[tid] = x
 
 	with open(outfile, 'wb') as fout:
+		logging.info('Writing to '+outfile)
 		cwriter = csv.writer(fout, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
 		title = ['tweet_id', 'created_on', 'username', 'tweet_txt', 'hashtag', 'followers', 'retweet', 'seen_count']
@@ -84,6 +87,7 @@ def create_csv(infile, outfile, query, uname):
 				cwriter.writerow(tweet_dict[item])
 
 	print outfile, 'Created'
+	logging.info('Process complete.')
 
 	return
 
@@ -94,9 +98,11 @@ def hash_list(infile, num):
 	hashtag_lib ={}
 	with open(infile, 'r') as fo:
 		list_of_tweets = fo.readlines()
+		logging.info('Opening input file '+infile)
 
 	count = 0
 
+	logging.info('Getting Tweet objects from '+infile)
 	for tweetobject in list_of_tweets:
 		try:
 			tweet = json.loads(tweetobject)
@@ -114,6 +120,7 @@ def hash_list(infile, num):
 
 	sorted_hl = sorted(hashtag_lib.items(), key=operator.itemgetter(1), reverse=True)
 
+	logging.info('Printing hashtag table')
 	x = PrettyTable(["Hashtag", "Frequency"])
 	x.align["Hashtag"] = "l"
 	x.align["Frequency"] = "r"
@@ -124,4 +131,5 @@ def hash_list(infile, num):
 
 	print x
 
+	logging.info('Process complete.')
 	return	

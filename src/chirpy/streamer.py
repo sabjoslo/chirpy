@@ -106,6 +106,7 @@ if __name__ == '__main__':
 
 	p = multiprocessing.Process(target=strmlister)
 	p.start()
+	logging.info('Starting process.')
 
 	start_time = datetime.now()	
 
@@ -135,6 +136,7 @@ if __name__ == '__main__':
 
 		
 	p.terminate()
+	logging.info('Process terminating.')
 	os.remove(logfile)
 	p.join()
 

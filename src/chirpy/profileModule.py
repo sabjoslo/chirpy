@@ -10,12 +10,12 @@ import codecs
 from prettytable import PrettyTable
 import time
 import sys
-import json
 import logging
 
 #-----------------------------------------------------------------------------------
 
 def get_profile(ppath, lpath):
+	logging.info('Getting profiles from '+ppath)
         profiles = os.listdir(ppath)
 
         profiles = [x for x in profiles if '.profile' in x]
@@ -23,6 +23,7 @@ def get_profile(ppath, lpath):
         if len(profiles) == 0:
                 time.sleep(0.5)
 		print 'No Available Profiles. Add A Few.'
+		logging.warning('No available profiles.')
                 sys.exit()
 
         pname = [x[:-8] for x in profiles]
@@ -33,20 +34,18 @@ def get_profile(ppath, lpath):
 	logging.info('Finding available profiles')
         for f in logfiles:
 		if '.eventlog' not in f:
-			logging.debug(str(f))
-			fo = open(lpath+f, 'r').read()
-			if fo.strip():
-				foj = json.loads(fo)
-				if 'profile' in foj:
-					logging.debug('Profile here: '+foj['profile'].upper()) 
-					used.append(foj['profile'].rstrip())
+			with open(lpath+f, 'r' ) as fo:
+				a = fo.readlines()
+			used.append(a[0].rstrip())
         free = list(set(pname).difference(used))
 
         if free:
                 return free[0]
+		logging.info('Returning '+free[0])
         else:
                 time.sleep(0.5)
 		print 'No Free Profiles'
+		logging.warning('No free profiles.')
                 sys.exit()
 
 def get_deets(profilepath):
@@ -55,6 +54,7 @@ def get_deets(profilepath):
 
     deets = {}
 
+    logging.info('Getting deets for profile '+profilepath.split('/')[-1])
     for line in info:
         infobit = line.rstrip().split(' ')
         if infobit[0] == 'access_token':
@@ -69,25 +69,24 @@ def get_deets(profilepath):
     return deets
 
 def plist(lpath, ppath):
+	logging.info('Getting all profiles')
 	logdeets = {}
 
 	lof = os.listdir(lpath)
 	for f in lof:
 		if '.eventlog' not in f:
-			logging.debug(str(f))
-                        fo = open(lpath+f, 'r').read()
-                        if fo.strip():
-                                foj = json.loads(fo)
-                                if 'profile' in foj:
-                                        logging.debug('Profile here: '+foj['profile'].upper())
-					p = foj['profile'].rstrip()
-					if 'search' in f:
-						logdeets[p] = 'search'
-					if 'stream' in f:
-						logdeets[p] = 'stream'
-					if 'user' in f:
-                       			 	logdeets[p] = 'user'
+			with open(lpath+f, 'r') as fo:
+				a = fo.readlines()
 
+			p = a[0].rstrip()
+			if 'search' in f:
+				logdeets[p] = 'search'
+			if 'stream' in f:
+				logdeets[p] = 'stream'
+			if 'user' in f:
+                      	 	logdeets[p] = 'user'
+
+	logging.info('Pretty printing all profiles')
 	x = PrettyTable(["Profile Name", "Consumer Key", "Consumer Secret", "Access Token", "Access Token Secret", "Status"])
 	x.align["Profile Name"] = "l"
 	x.align["Consumer Key"] = "l"
@@ -127,10 +126,12 @@ def addp(filename):
 
 	time.sleep(0.5)
         print 'Profile Added'
+	logging.info(filename[:-8]+' added')
         return
 
 def padd(ppath):
 	print 'Adding Profile'
+	logging.info('Adding profile')
 	time.sleep(0.5)
 
 	user = raw_input('Enter Twitter Username: ')
@@ -139,21 +140,25 @@ def padd(ppath):
 
 	if os.path.exists(filename):
         	ans = raw_input('Profile Already Exists. Do You Want To Overwrite? (y/n): ')
+		logging.warning('Profile already exists.')
         	if ans.lower() == 'y':
                 	addp(filename)
         	elif ans.lower() == 'n':
                 	time.sleep(0.5)
 			print 'Exiting'
+			logging.info('Profile not added.')
 			sys.exit()
         	else:
                 	time.sleep(0.5)
 			print 'Did Not Recognize Input'
+			logging.error('Did not recognize input. Profile not added.')
 			sys.exit()
 	else:
         	addp(filename)
 	return
 
 def pdel(ppath):
+	logging.info('Deleting profile')
 	pname = raw_input('Enter Username: ')
 	time.sleep(0.5)
 	filen = ppath+pname+'.profile'
@@ -164,10 +169,13 @@ def pdel(ppath):
 			time.sleep(0.5)
 			print 'Deleting Profile'
 			os.remove(filen)
+			logging.info(pname+' deleted')
 		else:
 			time.sleep(0.5)
 			print 'Did Not Recognize Input'
+			logging.warning('Did not recognize input. '+pname+' not deleted.')
 	else:
 		print 'Profile Does Not Exist'
+		logging.warning('Profile does not exist.')
 
 	return

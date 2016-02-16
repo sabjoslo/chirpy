@@ -20,9 +20,11 @@ def kill_p(pid, lpath):
 		os.kill(int(pid), signal.SIGQUIT) 
 		
 		print 'Stream terminated'
+		logging.info('Stream terminated. Process complete.')
 			
 	else:
 		print 'Stream not found'
+		logging.error('Stream not found.')
 
 
 def list_runs(lpath):
@@ -38,7 +40,7 @@ def list_runs(lpath):
         x.align["Run Time"] = "l"
         x.align["Profile"] = "l"
 
-     
+        logging.info('Getting streams.')
         lof = os.listdir(lpath)
         for f in lof:
                 if 'stream' in f:
@@ -51,8 +53,10 @@ def list_runs(lpath):
                         t = a[-1].split()[1]
                         tm = a[-1].split()[0]
                         x.add_row([pid, q, t, tm, p])
+	logging.info('Printing streams.')
         print x
-
+	
+	logging.info('Process complete.')
 	return
 
 	

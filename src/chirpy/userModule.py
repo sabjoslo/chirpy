@@ -29,7 +29,6 @@ def user_setup(output_dir, logfile):
         time.sleep(0.5)
 
         if output_dir: helpModule.make_outdir(root+output_dir)
-	open(logfile, 'a')
 
   	print 'Retrieving Twitter Profile'
         logging.info('Retrieving Twitter Profile')
@@ -39,7 +38,6 @@ def user_setup(output_dir, logfile):
 	logging.debug('Using profile '+__profile.upper())
         profilepath = ppath+__profile+'.profile'
         deets = profileModule.get_deets(profilepath)
-	helpModule.write_header('chirpy '+' '.join(sys.argv[1:]), __profile, logfile)
 
         print 'Authorizing Twitter Profile'
         logging.info('Authorizing Twitter Profile')
@@ -55,7 +53,7 @@ def get_user_timeline(user_id, user, count, include_rts, max_id=None):
 	else:
 		return __twitterapi__.user_timeline(screen_name=user, count=count, max_id=max_id, include_rts=include_rts)
 
-def user_history(user, fo, output_dir, num, rts, overwrite, logfile):	
+def user_history(user, output_file, output_dir, num, rts, update, logfile):	
 	if num > 3200:
 		print 'Twitter only allows access to the last 3,200 user tweets.'
 		loop = True
@@ -72,26 +70,10 @@ def user_history(user, fo, output_dir, num, rts, overwrite, logfile):
 					loop = True
 	if num > 3200:
 		print 'Twitter only allows access to the last 3,200 user tweets.'
-		
-
-	write_to_file = True
-	if fo:
-		outfile = root + fo
-	elif output_dir:
-		outfile = root + '/' + output_dir + '/' + user+'.txt'
-	else:
-		outfile = sys.stdout
-		write_to_file = False
-	
 
 	print 'Configuring Files'
 	logging.info('Configuring Files')
 	time.sleep(0.5)
-
-	if overwrite and write_to_file:
-		fo = open(outfile, 'w')
-		logging.info('Creating empty file '+outfile)
-		fo.close()
 	
 	count = 200
 	status = []
@@ -104,8 +86,23 @@ def user_history(user, fo, output_dir, num, rts, overwrite, logfile):
 	else:
 		timeline_results = get_user_timeline(user.isdigit(), user, count, rts)
 
+	with open(logfile, 'a') as fo:
+		fo.write(__profile+'\n')
+		fo.write(user+'\n')
+		fo.write(str(len(status))+'\n')
+
    	status.extend(timeline_results)
 	oldest = status[-1]['id'] - 1
+	userid = status[0]['user']['id_str']
+	print userid
+	screenname = status[0]['user']['screen_name']
+	print screenname
+	if update == 'SKIP' and output_dir:
+        	for f in os.listdir(output_dir):
+                	if f.split('_')[0] == userid:
+				print 'Skipping user #'+userid
+				logging.info('Skipping user #'+userid)
+				return
 
 	print 'Tweets Collected: ', len(status)
 
@@ -120,13 +117,28 @@ def user_history(user, fo, output_dir, num, rts, overwrite, logfile):
 
         	print 'Tweets Collected: ', len(status)
                
-		helpModule.write_to_log_file(len(status), __profile, user, logfile)
+		with open(logfile, 'a') as fo:
+			fo.write(str(len(status))+'\n')
 
 		time.sleep(6)
 
 	if num > len(status):
 		print 'Could not retrieve number specified.'
 		logging.warning('Could not retrieve num_tweets specified')
+
+	write_to_file = True
+        if output_file:
+                outfile = root + output_file
+        elif output_dir:
+                outfile=root+'/'+output_dir+'/'+userid+'_'+screenname+'.txt'
+        else:
+                outfile = sys.stdout
+                write_to_file = False
+
+	if update == 'OVERWRITE' and write_to_file:
+                fo = open(outfile, 'w')
+                logging.info('Creating empty file '+outfile)
+                fo.close()
 
 	print 'Writing To File'
 	logging.info('Writing to file '+str(outfile))

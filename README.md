@@ -8,7 +8,7 @@ a command line interface for quickly collecting and parsing Twitter data.
 
 chirpy is a command line tool for swift and streamlined collection of Twitter data. The toolset is capable of collecting already posted tweets, actively tracking the live Twitter feed for specific keywords and retrieving user history along with additional resources for parsing captured data.
 
-There are three tools for data collection - `search`, `stream`, `user` and two for parsing `tophash` and `parse`. Additional tools involve handling Twitter API profiles, managing running streams, and process managing and monitoring.
+There are three tools for data collection - `search`, `stream`, `user` and two for parsing `tophash` and `parse`. Additional tools involve handling Twitter API profiles and managing running streams.
 
 ***
 
@@ -45,7 +45,7 @@ On installation, chirpy creates a directory `.chirpy` in user home. The director
 
 - `search`: search Twitter for a partcular keyword.
 - `stream`: actively track a live Twitter stream for a particular keyword.
-- `user`: retrive atmost the recent 3200 tweets form a users's timeline.
+- `user`: retrive at most the recent 3200 tweets form a users's timeline.
 
 ## Data parsing options
 
@@ -54,7 +54,7 @@ On installation, chirpy creates a directory `.chirpy` in user home. The director
 
 ## Stream management options 
 
-- `stream_list`: lists the current runnign stream trackers.
+- `stream_list`: lists the current running stream trackers.
 - `stream_remove`: remove an existing stream.
 
 ## Profile management options 
@@ -63,9 +63,7 @@ On installation, chirpy creates a directory `.chirpy` in user home. The director
 - `profile_list`: lists all added Twitter API auth profiles.
 - `profile_remove`: removes an existing Twitter API auth profile.
 
-## Process management and monitoring
-- `resume`: option to rerun the command of an unfinished process.
-*Note:* `resume` was designed for `user` option, and has not been adapted for other options.
+## Other
 - `cleanup`: deletes existing log files. By default, logs are deleted once the process has been completed. Note that the `--nosweep` flag tells Chirpy not to clean event logs.
 
 ## Flags
@@ -120,7 +118,7 @@ You will then be prompted to confirm deleting the profile. Type y.
 
 ## The search option
 
-Search looks for already published tweets containg a keyword. While not mentioned officailly, the API can only retrieve tweets 7-10 days old. The crawler saves the json objects of the tweets in a txt file, one per line.
+Search looks for already published tweets containg a keyword. While not mentioned officailly, the API can only retrieve tweets 7-10 days old. If specified, the crawler saves the json objects of the tweets in a txt file, one per line, and otherwise prints output to stdout.
 
 #### Usage
 
@@ -161,15 +159,13 @@ Writing To File
 
 ## Getting user history 
 
-The option `user` can be used to access tweets from a particular user or a list of users. Twitter allows access to only the last 3200 tweets. The crawler saves the json objects of the tweets in a separate txt file for each user, one per line. The option would only work if the account(s) are public.
-
-The results are saved in user_name.txt in the approproate directories.
+The option `user` can be used to access tweets from a particular user or a list of users. Twitter allows access to only the last 3200 tweets. The crawler saves the json objects of the tweets in a txt file, one per line, or prints to stdout. The option would only work if the account(s) are public.
 
 #### Usage
 
 	chirpy user [user_name ...] [options]
 
-- The option `user_name` specifies usernames of the Twitter follower(s). Can be user's screen name or user ID. @ is not required. Not required if *input_file* is specified (`-i`).
+- The option `user_name` specifies usernames of the Twitter follower(s). Can be user's screen name or user ID. @ is not required. Not required if *input_file* is specified (`-i`), or if reading from stdin.
 
 **Options**
 - **-i**: Input file. If specified, the list of users is extracted line-by-line from *input_file*.
@@ -178,17 +174,19 @@ The results are saved in user_name.txt in the approproate directories.
 **Note:** If both *output_file* and *output_dir* are specified, *output_dir* is ignored and *output_file* is created in pwd. If neither are specified, json objects of the tweets are written to stdout.
 - **-n**: *num_tweets* specifies the number of (most recent) tweets to be collected. If unspecificed, *num_tweets* defaults to 3,200.
 - **--retweets** includes retweets in output. If unspecified, retweets are not included in output. **Note:** Twitter includes retweets in rate limits whether --retweets flag is included or not. If *num_tweets* is specified and is below rate limit, retweets will **not** be included in collection count.
-- **--overwrite**: If it exists, overwrite user_name.txt in output_dir file with current output.
-
+- **-u, --update**: Valid options are *APPEND*, *OVERWRITE*, and *SKIP* (defaults to *APPEND* if unspecified).
+*APPEND*: If userfile exists, append data to existing file.
+*OVERWRITE*: If userfile exists, overwrite.
+*SKIP*: If userfile exists, keep file and don't collect any more data for this user.
 
 Events during the process are stored in an .eventlog file in *lpath*. Other information about the progress made by the process is stored in a .userlog file in *lpath*.
 
-Example: `chirpy user saleemq90 -o testhello -n 1000 --retweets --overwrite` 
+Example: `chirpy user saleemq90 -o testhello -n 1000 -u OVERWRITE --retweets` 
 
-This will search for the last 1,000 tweets by user **saleemq90** (including retweets), list them in a txt file named **saleemq90.txt**, and place them in a directory named **testhello** inside the current directory, overwriting any existing file with the same path. Note that this user has posted fewer tweets than *num_tweets*.
+This will search for the last 1,000 tweets by user **saleemq90** (including retweets), list them in a txt file named **xxxxx_saleemq90.txt**, where `xxxxx` is the user's true user ID, and place them in a directory named **testhello** inside the current directory, overwriting any existing file with the same user ID. Note that this user has posted fewer tweets than *num_tweets*.
 
 ```
-user:~$ chirpy user saleemq90 -o testhello --retweets --overwrite
+user:~$ chirpy user saleemq90 -o testhello -n 1000 -u OVERWRITE --retweets
 User(s): ['saleemq90']
 Output written to testhello/<user>.txt
 Number of tweets: 1000

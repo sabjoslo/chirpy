@@ -15,9 +15,11 @@ from urllib import quote_plus
 from urllib import unquote
 import json, time, errno
 import twitter
+import logging
 
-def searching(configs, query, output_file, output_dir, num):
-	print 'Getting Configurations' 
+def searching(configs, query, write_to_file, output_file, num):
+	print 'Getting Configurations'
+	logging.info('Getting configurations')
 	time.sleep(0.5)
 	ppath = configs['ppath']
 	lpath = configs['lpath']
@@ -25,29 +27,33 @@ def searching(configs, query, output_file, output_dir, num):
 	if root == 'False':
         	root = './'
 	
-	helpModule.make_outdir(root+output_dir)
-	
 	print 'Configuring Files'
+	logging.info('Configuring files')
 	time.sleep(0.5)
-	outfile = root + output_dir + '/' + output_file
-
-	fo = open(outfile, 'w')
-	fo.close()
+	if write_to_file:
+		outfile = root + output_file
+		fo = open(outfile, 'w')
+		fo.close()
+	else:
+		outfile = output_file
 
 	print 'Encoding Query'
+	logging.info('Encoding Query')
 	time.sleep(0.5)
 	enc_query = quote_plus(query.encode('UTF-8'), safe=':/')
 
         pid = str(os.getpid())
         logfile = lpath+pid+'.searchlog'
 	
-	print 'Retrieving Twitter Profile' 
+	print 'Retrieving Twitter Profile'
+	logging.info('Retrieving Twitter Profile')
         time.sleep(0.5)
 	profile = profileModule.get_profile(ppath, lpath)
         profilepath = ppath+profile+'.profile'
         deets = profileModule.get_deets(profilepath)
 
 	print 'Authorizing Twitter Profile'
+	logging.info('Authorizing Twitter profile')
 	time.sleep(0.5)
 	auth = twitter.oauth.OAuth(deets["access_token"], deets["access_token_secret"], deets["consumer_key"], deets["consumer_secret"])
 	twitter_api = twitter.Twitter(auth=auth)
@@ -55,6 +61,7 @@ def searching(configs, query, output_file, output_dir, num):
 	count = 100
 
 	print 'Starting Search'
+	logging.info('Starting search')
 	time.sleep(0.5)
 	search_results = twitter_api.search.tweets(q=enc_query, count=count)
 
@@ -72,6 +79,7 @@ def searching(configs, query, output_file, output_dir, num):
  
 		if int(num)!= 0 and counter >= int(num):
 			print 'Deadline Reached \nExiting'
+			logging.info('Deadline reached. No more Tweets collected.')
 			break		
 
 		helpModule.write_to_file(statuses, outfile)
@@ -93,9 +101,16 @@ def searching(configs, query, output_file, output_dir, num):
 		time.sleep(6)
 
 	print 'Writing To File'
-	helpModule.write_to_file(statuses, outfile)
+	if write_to_file:
+		out = output_file
+	else:
+		out = 'stdout'
+	logging.info('Writing to '+out)
+	helpModule.write_to_file(statuses, write_to_file, outfile)
 
 	os.remove(logfile)
 	
+	logging.info('Process complete.')
+
 	return
 
