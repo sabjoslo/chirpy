@@ -36,7 +36,6 @@ import json
 from ChirpyError import *
 import fileinput
 import traceback
-import select
 
 configs = read_config()
 #ref_logs() function deletes log files from previous processes.
