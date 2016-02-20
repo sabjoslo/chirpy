@@ -43,7 +43,6 @@ def get_profile(ppath, lpath):
                 return free[0]
 		logging.info('Returning '+free[0])
         else:
-                time.sleep(0.5)
 		print 'No Free Profiles'
 		logging.warning('No free profiles.')
                 sys.exit()
@@ -124,7 +123,6 @@ def addp(filename):
                 ats = raw_input('access_token_secret: ')
                 fo.write('access_token_secret = '+ats+'\n')
 
-	time.sleep(0.5)
         print 'Profile Added'
 	logging.info(filename[:-8]+' added')
         return
@@ -132,7 +130,6 @@ def addp(filename):
 def padd(ppath):
 	print 'Adding Profile'
 	logging.info('Adding profile')
-	time.sleep(0.5)
 
 	user = raw_input('Enter Twitter Username: ')
 
@@ -144,12 +141,10 @@ def padd(ppath):
         	if ans.lower() == 'y':
                 	addp(filename)
         	elif ans.lower() == 'n':
-                	time.sleep(0.5)
 			print 'Exiting'
 			logging.info('Profile not added.')
 			sys.exit()
         	else:
-                	time.sleep(0.5)
 			print 'Did Not Recognize Input'
 			logging.error('Did not recognize input. Profile not added.')
 			sys.exit()
@@ -160,18 +155,15 @@ def padd(ppath):
 def pdel(ppath):
 	logging.info('Deleting profile')
 	pname = raw_input('Enter Username: ')
-	time.sleep(0.5)
 	filen = ppath+pname+'.profile'
 
 	if os.path.exists(filen):
 		ans = raw_input('Confirm Deleting Profile (y): ')
 		if ans.lower() == 'y':
-			time.sleep(0.5)
 			print 'Deleting Profile'
 			os.remove(filen)
 			logging.info(pname+' deleted')
 		else:
-			time.sleep(0.5)
 			print 'Did Not Recognize Input'
 			logging.warning('Did not recognize input. '+pname+' not deleted.')
 	else:

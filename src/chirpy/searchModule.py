@@ -20,7 +20,6 @@ import logging
 def searching(configs, query, write_to_file, output_file, num):
 	print 'Getting Configurations'
 	logging.info('Getting configurations')
-	time.sleep(0.5)
 	ppath = configs['ppath']
 	lpath = configs['lpath']
 	root = configs['dpath']
@@ -29,7 +28,6 @@ def searching(configs, query, write_to_file, output_file, num):
 	
 	print 'Configuring Files'
 	logging.info('Configuring files')
-	time.sleep(0.5)
 	if write_to_file:
 		outfile = root + output_file
 		fo = open(outfile, 'w')
@@ -39,7 +37,6 @@ def searching(configs, query, write_to_file, output_file, num):
 
 	print 'Encoding Query'
 	logging.info('Encoding Query')
-	time.sleep(0.5)
 	enc_query = quote_plus(query.encode('UTF-8'), safe=':/')
 
         pid = str(os.getpid())
@@ -47,14 +44,12 @@ def searching(configs, query, write_to_file, output_file, num):
 	
 	print 'Retrieving Twitter Profile'
 	logging.info('Retrieving Twitter Profile')
-        time.sleep(0.5)
 	profile = profileModule.get_profile(ppath, lpath)
         profilepath = ppath+profile+'.profile'
         deets = profileModule.get_deets(profilepath)
 
 	print 'Authorizing Twitter Profile'
 	logging.info('Authorizing Twitter profile')
-	time.sleep(0.5)
 	auth = twitter.oauth.OAuth(deets["access_token"], deets["access_token_secret"], deets["consumer_key"], deets["consumer_secret"])
 	twitter_api = twitter.Twitter(auth=auth)
 
@@ -62,7 +57,6 @@ def searching(configs, query, write_to_file, output_file, num):
 
 	print 'Starting Search'
 	logging.info('Starting search')
-	time.sleep(0.5)
 	search_results = twitter_api.search.tweets(q=enc_query, count=count)
 
 	with open(logfile, 'a') as fo:
@@ -97,8 +91,6 @@ def searching(configs, query, write_to_file, output_file, num):
 
 		with open(logfile, 'a') as fo:
 			fo.write(str(tweets)+'\n')
-
-		time.sleep(6)
 
 	print 'Writing To File'
 	if write_to_file:

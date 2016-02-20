@@ -35,6 +35,8 @@ import logging
 import json
 from ChirpyError import *
 import fileinput
+import traceback
+import select
 
 configs = read_config()
 #ref_logs() function deletes log files from previous processes.
@@ -102,17 +104,10 @@ if args.options == 'search':
 elif args.options == 'user':
 	logging.info('User module called')
 
-	if args.user:
-        	users = args.user                     
-        elif not sys.stdin.isatty():
-                users = []
-		logging.info('Reading from stdin.')
-	        for user in sys.stdin:
-                       	users.append(user.rstrip('\n').rstrip('\r'))
-		if len(users) == 0:
-			raise InputError('stdin is empty.', llevel = 'critical')                     
-	else:
-        	raise InputError('Requires user.', llevel='critical')
+	if not args.user:
+		if sys.stdin.isatty():
+			print 'No user passed.'
+			raise InputError('Requires user.', llevel='critical')
 
 	output_file = False
 	output_dir = False
@@ -132,24 +127,41 @@ elif args.options == 'user':
 	else:
 		update = 'APPEND' 
 		
-	try:
-		lpath = configs['lpath']
-		logfile = lpath+pid+'.userlog'
-		print 'User(s): ', users
-                print 'Output written to ', output
-                print 'Number of tweets: ', num
-                print 'Include retweets: ', rts
-                print 'Update: ', update
+	lpath = configs['lpath']
+	logfile = lpath+pid+'.userlog'
+        print 'Output written to ', output
+        print 'Number of tweets: ', num
+        print 'Include retweets: ', rts
+        print 'Update: ', update
  			
-		user_setup(output_dir, logfile)
-		for user in users:
-                       	user_history(user, output_file, output_dir, num, rts, update, logfile)
-		helpModule.delete_file(logfile)			
+	user_setup(output_dir, logfile)
+	
+	if not sys.stdin.isatty():
+		user = sys.stdin.readline().rstrip()
+		print user
+		while user.strip():
+			print 'Current user: '+user
+                       	try:
+                        	user_history(user, output_file, output_dir, num, rts, update, logfile)
+                        except tweepy.error.TweepError as e:
+                                print e
+                                logging.warning('TweepyError: '+str(e))   
+			user = sys.stdin.readline().rstrip()
+		else:
+			raise InputError('No user passed.', llevel='error')
 
-	except tweepy.error.TweepError as e:
-               	print 'Terminating'
-               	print e
-		logging.critical(str(e))
+	else:
+		users = args.user
+		for user in users:
+			print 'Current user: '+user
+			try:
+                     		user_history(user, output_file, output_dir, num, rts, update, logfile)
+			except tweepy.error.TweepError as e:
+				print e
+				logging.warning('TweepyError: '+str(e))
+				continue
+	
+	helpModule.delete_file(logfile)			
 
 elif args.options == 'parse':
 	logging.info('Calling create_csv() from parseModule')

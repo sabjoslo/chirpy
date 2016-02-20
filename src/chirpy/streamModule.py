@@ -11,7 +11,6 @@ import time
 
 def kill_p(pid, lpath):
         fname = lpath+str(pid)+'.streamlog'
-        time.sleep(0.5)
 	if os.path.isfile(fname):
 		with open(fname, 'r') as fo:
 			lines = fo.readlines()
@@ -29,7 +28,6 @@ def kill_p(pid, lpath):
 
 def list_runs(lpath):
 	print 'Running Streams'
-	time.sleep(0.5)
 
         title = ['Pid', 'Query', 'Tweets Collected', 'Run time', 'Profile']
 

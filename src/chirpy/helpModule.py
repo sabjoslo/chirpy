@@ -40,7 +40,6 @@ def make_outdir(path):
         try:
                 os.makedirs(path)
         	print 'Output Directory Created'
-		time.sleep(0.5)
 	except OSError as exception:
                 if exception.errno != errno.EEXIST:
                         raise
